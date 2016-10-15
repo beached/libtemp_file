@@ -43,101 +43,35 @@ namespace std {
 namespace daw {
 	namespace impl {
 		namespace {
-			class delete_on_exit_holder_t;
-			delete_on_exit_holder_t & delete_on_exits( );
-			boost::filesystem::path create_delete_on_exit( );
-			void delete_delete_on_exit( boost::filesystem::path const & path );
-		}
+			auto generate_temp_file_path( ) {
+				return boost::filesystem::temp_directory_path( ) / boost::filesystem::unique_path( ).replace_extension( ".tmp" );
+			}
+		}	// namespace anonymous
+		
 		struct scoped_delete_on_exit {
 			boost::filesystem::path path;
 
-
 			scoped_delete_on_exit( ):
-				path{ create_delete_on_exit( ) } { }
+				path{ generate_temp_file_path( ) } { }
 
-			scoped_delete_on_exit( boost::filesystem::path p );
-			boost::filesystem::path disconnect( );
-			~scoped_delete_on_exit( ) noexcept;
+			scoped_delete_on_exit( boost::filesystem::path p ):
+				path{ std::move( p ) } { }
+
+			boost::filesystem::path disconnect( ) {
+				return std::exchange( path, boost::filesystem::path{ } );
+			}
+
+			~scoped_delete_on_exit( ) noexcept {
+				try {
+					if( path != boost::filesystem::path{ } && exists( path ) ) {
+						remove( path );
+					}
+				} catch( std::exception const & ex ) {
+					std::cerr << "Exception while removing tmp files: " << ex.what( ) << std::endl;
+				}
+			}
+
 		};	// scoped_delete_on_exit
-
-		namespace {
-			class delete_on_exit_holder_t {
-				std::unordered_set<boost::filesystem::path> m_paths;
-				std::mutex m_mutex;
-				public:
-				delete_on_exit_holder_t( ) = default;
-				delete_on_exit_holder_t( delete_on_exit_holder_t const & ) = delete;
-				delete_on_exit_holder_t( delete_on_exit_holder_t && ) = default;
-				delete_on_exit_holder_t & operator=( delete_on_exit_holder_t const & ) = delete;
-				delete_on_exit_holder_t & operator=( delete_on_exit_holder_t && ) = default;
-
-				~delete_on_exit_holder_t( ) {
-					try {
-						for( auto const & path : m_paths ) {
-							try {
-								if( exists( path ) ) {
-									remove( path );
-								}
-							} catch( std::exception const & ex ) {
-								std::cerr << "Exception while removing tmp files: " << ex.what( ) << std::endl;
-							}
-						}
-					} catch(...) { }
-				}
-
-				void insert( boost::filesystem::path p ) {
-					std::lock_guard<std::mutex> lock{ m_mutex };
-					m_paths.insert( std::move( p ) );
-				}
-
-				void erase( boost::filesystem::path const & p ) {
-					std::lock_guard<std::mutex> lock{ m_mutex };
-					m_paths.erase( p );
-				}
-			};	// delete_on_exit_holder_t
-		}	// namespace anonymous
-
-		scoped_delete_on_exit::scoped_delete_on_exit( boost::filesystem::path p ):
-				path{ std::move( p ) } {
-
-			delete_on_exits( ).insert( path );
-		}
-
-		boost::filesystem::path scoped_delete_on_exit::disconnect( ) {
-			auto result = std::exchange( path, boost::filesystem::path{ } );
-			delete_on_exits( ).erase( result );
-			return result;
-		}
-
-		scoped_delete_on_exit::~scoped_delete_on_exit( ) noexcept {
-			try {
-				if( path != boost::filesystem::path{ } ) {
-					auto tmp = std::exchange( path, boost::filesystem::path{ } );
-					delete_delete_on_exit( tmp );
-				}
-			} catch( std::exception const & ) { }
-		}
-
-
-		namespace {
-			impl::delete_on_exit_holder_t & delete_on_exits( ) {
-				static impl::delete_on_exit_holder_t result;
-				return result;
-			}
-
-			boost::filesystem::path create_delete_on_exit( ) {
-				auto result = boost::filesystem::temp_directory_path( ) / boost::filesystem::unique_path( ).replace_extension( ".tmp" );
-				impl::delete_on_exits( ).insert( result );
-				return result;
-			}
-
-			void delete_delete_on_exit( boost::filesystem::path const & path ) {
-				if( exists( path ) ) {
-					remove( path );
-					impl::delete_on_exits( ).erase( path );
-				}
-			}
-		}	// namespace anonymous
 	}	// namespace impl
 
 	boost::filesystem::path & delete_on_exit::get( ) {
