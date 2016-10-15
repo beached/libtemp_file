@@ -31,87 +31,145 @@
 
 namespace std {
 	template<>
-		class hash<boost::filesystem::path> {
-			std::hash<std::string> m_hash;
+	class hash<boost::filesystem::path> {
+		std::hash<std::string> m_hash;
 		public:
-			auto operator()( boost::filesystem::path const & path ) const {
-				return m_hash( path.string( ) );
-			}
-		};
+		auto operator()( boost::filesystem::path const & path ) const {
+			return m_hash( path.string( ) );
+		}
+	};	// hash
 }
 
 namespace daw {
 	namespace impl {
-		class tmp_file_holder_t {
-			std::unordered_set<boost::filesystem::path> m_paths;
-			std::mutex m_mutex;
-		public:
-			tmp_file_holder_t( ) = default;
-			tmp_file_holder_t( tmp_file_holder_t const & ) = delete;
-			tmp_file_holder_t( tmp_file_holder_t && ) = default;
-			tmp_file_holder_t & operator=( tmp_file_holder_t const & ) = delete;
-			tmp_file_holder_t & operator=( tmp_file_holder_t && ) = default;
+		struct scoped_temp_file {
+			boost::filesystem::path path;
+			boost::filesystem::path disconnect( );
+			scoped_temp_file( );
+			~scoped_temp_file( ) noexcept;
+		};	// scoped_temp_file
 
-			~tmp_file_holder_t( ) {
-				try {
-					for( auto const & path : m_paths ) {
-						try {
-							if( exists( path ) ) {
-								remove( path );
+		namespace {
+			class temp_file_holder_t {
+				std::unordered_set<boost::filesystem::path> m_paths;
+				std::mutex m_mutex;
+				public:
+				temp_file_holder_t( ) = default;
+				temp_file_holder_t( temp_file_holder_t const & ) = delete;
+				temp_file_holder_t( temp_file_holder_t && ) = default;
+				temp_file_holder_t & operator=( temp_file_holder_t const & ) = delete;
+				temp_file_holder_t & operator=( temp_file_holder_t && ) = default;
+
+				~temp_file_holder_t( ) {
+					try {
+						for( auto const & path : m_paths ) {
+							try {
+								if( exists( path ) ) {
+									remove( path );
+								}
+							} catch( std::exception const & ex ) {
+								std::cerr << "Exception while removing tmp files: " << ex.what( ) << std::endl;
 							}
-						} catch( std::exception const & ex ) {
-							std::cerr << "Exception while removing tmp files: " << ex.what( ) << std::endl;
 						}
-					}
-				} catch(...) { }
+					} catch(...) { }
+				}
+
+				void insert( boost::filesystem::path p ) {
+					std::lock_guard<std::mutex> lock{ m_mutex };
+					m_paths.insert( std::move( p ) );
+				}
+
+				void erase( boost::filesystem::path const & p ) {
+					std::lock_guard<std::mutex> lock{ m_mutex };
+					m_paths.erase( p );
+				}
+			};	// temp_file_holder_t
+
+			auto & temp_files( ) {
+				static impl::temp_file_holder_t result;
+				return result;
 			}
 
-			void insert( boost::filesystem::path p ) {
-				std::lock_guard<std::mutex> lock{ m_mutex };
-				m_paths.insert( std::move( p ) );
+			boost::filesystem::path create_temp_file( ) {
+				auto result = boost::filesystem::temp_directory_path( ) / boost::filesystem::unique_path( ).replace_extension( ".tmp" );
+				impl::temp_files( ).insert( result );
+				return result;
 			}
 
-			void erase( boost::filesystem::path const & p ) {
-				std::lock_guard<std::mutex> lock{ m_mutex };
-				m_paths.erase( p );
+			void delete_temp_file( boost::filesystem::path const & path ) {
+				if( exists( path ) ) {
+					remove( path );
+					impl::temp_files( ).erase( path );
+				}
 			}
-		};	// tmp_file_holder_t
+		}	// namespace impl
+	}	// namespace anonymous
 
-		auto & tmp_files( ) {
-			static impl::tmp_file_holder_t result;
+	boost::filesystem::path & temp_file::get( ) {
+		return m_path->path;
+	}
+
+	boost::filesystem::path const & temp_file::get( ) const {
+		return m_path->path;
+	}
+
+	temp_file::temp_file( ):
+			m_path{ std::make_shared<daw::impl::scoped_temp_file>( ) } { }
+
+	temp_file::~temp_file( ) { }
+
+	boost::filesystem::path & temp_file::operator*( ) {
+		return get( );
+	}
+
+	boost::filesystem::path const & temp_file::operator*( ) const {
+		return get( );
+	}
+
+	boost::filesystem::path * temp_file::operator->( ) {
+		return &(get( ));
+	}
+
+	boost::filesystem::path const * temp_file::operator->( ) const {
+		return &(get( ));
+	}
+
+	boost::filesystem::path temp_file::disconnect( ) {
+		if( m_path ) {
+			return m_path->disconnect( );
+		}
+		return boost::filesystem::path{ };
+	}
+
+	temp_file::operator bool( ) const {
+		return m_path && get( ) != boost::filesystem::path{ };
+	}
+
+	bool temp_file::empty( ) const {
+		if( m_path ) {
+			return get( ) == boost::filesystem::path{ };
+		}
+		return true;
+	}
+
+	namespace impl {
+		scoped_temp_file::scoped_temp_file( ):
+			path{ impl::create_temp_file( ) } { }
+
+		boost::filesystem::path scoped_temp_file::disconnect( ) {
+			auto result = std::exchange( path, boost::filesystem::path{ } );
+			impl::temp_files( ).erase( result );
 			return result;
 		}
-	}	// namespace impl
 
-	boost::filesystem::path create_tmpfile( ) {
-		auto result = boost::filesystem::temp_directory_path( ) / boost::filesystem::unique_path( ).replace_extension( ".tmp" );
-		impl::tmp_files( ).insert( result );
-		return result;
-	}
-
-	void delete_tmpfile( boost::filesystem::path const & path ) {
-		if( exists( path ) ) {
-			remove( path );
-			impl::tmp_files( ).erase( path );
+		scoped_temp_file::~scoped_temp_file( ) noexcept {
+			try {
+				if( path != boost::filesystem::path{ } ) {
+					auto tmp = std::exchange( path, boost::filesystem::path{ } );
+					impl::delete_temp_file( tmp );
+				}
+			} catch( std::exception const & ) { }
 		}
-	}
-
-	scoped_tmpfile::scoped_tmpfile( ):
-			path{ create_tmpfile( ) } { }
-
-	boost::filesystem::path scoped_tmpfile::reset( ) {
-		auto result = std::exchange( path, boost::filesystem::path{ } );
-		impl::tmp_files( ).erase( result );
-		return result;
-	}
-
-	scoped_tmpfile::~scoped_tmpfile( ) noexcept {
-		try {
-			if( path != boost::filesystem::path{ } ) {
-				auto tmp = std::exchange( path, boost::filesystem::path{ } );
-				delete_tmpfile( tmp );
-			}
-		} catch( std::exception const & ) { }
 	}
 }    // namespace daw
 

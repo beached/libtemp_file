@@ -30,17 +30,21 @@
 
 #include "temp_file.h"
 
-BOOST_AUTO_TEST_CASE( scoped_tmpfile_test_001 ) {
-	boost::filesystem::path p;
-	{
-		daw::scoped_tmpfile stmp;
-		std::ofstream out_file{ stmp.path.string( ), std::ios::trunc };
-		BOOST_REQUIRE( out_file );
-		out_file << "Test failed\n";
-		out_file.close( );
-		BOOST_REQUIRE( exists( stmp.path ) );
-		p = stmp.path;
-		BOOST_REQUIRE( exists( p ) );
-	}
-	BOOST_REQUIRE( !exists( p ) );
+BOOST_AUTO_TEST_CASE( temp_file_test_002 ) {
+	daw::temp_file tmp;
+	BOOST_REQUIRE( tmp );
+	std::cout << "Temp file: " << *tmp << std::endl;
+	std::ofstream out_file{ tmp->string( ), std::ios::trunc };
+	out_file << "Test failed\n";
+	out_file.close( );
+}
+
+BOOST_AUTO_TEST_CASE( temp_file_test_003 ) {
+	daw::temp_file tmp;
+	BOOST_REQUIRE( tmp );
+	std::cout << "Temp file: " << *tmp << std::endl;
+	std::ofstream out_file{ tmp->string( ), std::ios::trunc };
+	out_file << "Test passed\n";
+	out_file.close( );
+	tmp.disconnect( );
 }

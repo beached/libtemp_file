@@ -23,17 +23,36 @@
 #pragma once
 
 #include <boost/filesystem/path.hpp>
-#include <mutex>
+#include <memory>
 
-namespace daw {	
-	boost::filesystem::path create_tmpfile( );
-	void delete_tmpfile( boost::filesystem::path const & path );
+namespace daw {
+	namespace impl {
+		struct scoped_temp_file;
+	}
 
-	struct scoped_tmpfile {
-		boost::filesystem::path path;
-		boost::filesystem::path reset( );
-		scoped_tmpfile( );
-		~scoped_tmpfile( ) noexcept;
-	};
+	/// @brief Constructs a unique temp file path that can be copied and moved.  It has the same
+	///			semantics as a shared_ptr and when the last copy goes out of scope the file, if
+	///			it exists is deleted.
+	class temp_file {
+		std::shared_ptr<impl::scoped_temp_file> m_path;
+		boost::filesystem::path & get( );
+		boost::filesystem::path const & get( ) const;
+	public:
+		temp_file( );
+		temp_file( temp_file const & ) = default;
+		temp_file( temp_file && ) = default;
+		temp_file & operator=( temp_file const & ) = default;
+		temp_file & operator=( temp_file && ) = default;
+		~temp_file( );
+
+		boost::filesystem::path & operator*( );
+		boost::filesystem::path const & operator*( ) const;
+		boost::filesystem::path const * operator->( ) const;
+		boost::filesystem::path * operator->( );
+		boost::filesystem::path disconnect( );
+
+		explicit operator bool( ) const;
+		bool empty( ) const;
+	};	// temp_file
 }    // namespace daw
 
