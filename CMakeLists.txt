@@ -19,6 +19,9 @@ else( )
 endif()
 
 set( HEADER_FOLDER "include" )
+set( SOURCE_FOLDER "src" )
+set( TEST_FOLDER "tests" )
+
 include_directories( ${HEADER_FOLDER} )
 
 set( HEADER_FILES
@@ -26,7 +29,7 @@ set( HEADER_FILES
 )
 
 set( SOURCE_FILES
-	delete_on_exit.cpp
+	${SOURCE_FOLDER}/delete_on_exit.cpp
  )
 
 include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
@@ -38,7 +41,7 @@ link_directories( ${Boost_LIBRARY_DIRS} )
 add_library( delete_on_exit ${HEADER_FILES} ${SOURCE_FILES} )
 target_link_libraries( delete_on_exit ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
 
-add_executable( delete_on_exit_test_bin delete_on_exit_test.cpp ${HEADER_FILES} )
+add_executable( delete_on_exit_test_bin ${HEADER_FILES} ${TEST_FOLDER}/delete_on_exit_test.cpp )
 target_link_libraries( delete_on_exit_test_bin delete_on_exit ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
 add_test( delete_on_exit_test, delete_on_exit_test_bin )
 
