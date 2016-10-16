@@ -12,4 +12,4 @@ The class holds a shared_ptr containing boost::filesystem::path and the methods 
 	}
 }
 ```
-
+To prevent the file from being deleted, you can call disconnect( ) and it will return the path object and no longer delete the file on destruction
