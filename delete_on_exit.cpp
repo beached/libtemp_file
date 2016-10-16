@@ -127,7 +127,7 @@ namespace daw {
 		if( empty( ) ) {
 			throw std::runtime_error{ "Attempt to create a file from empty path" };
 		}
-		auto result = open( string( ).c_str( ), O_CREAT | O_WRONLY, 00600 );
+		auto result = open( string( ).c_str( ), O_CREAT | O_WRONLY | O_EXCL, 00600 );
 		if( result < 0 ) {
 			throw std::runtime_error{ "Could not create temp file" };
 		}
