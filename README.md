@@ -1,4 +1,4 @@
-# libtemp_file
+# libdelete_on_exit
 A simple interface to create temp files and ensure their removal at program exit.
 
 The class has the same semantics as a shared_ptr and will delete the file when the last copy is destructed.
