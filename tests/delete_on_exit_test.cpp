@@ -51,15 +51,6 @@ BOOST_AUTO_TEST_CASE( delete_on_exit_test_003 ) {
 	tmp.disconnect( );
 }
 
-BOOST_AUTO_TEST_CASE( delete_on_exit_test_004 ) {
-	daw::delete_on_exit tmp{ { "/tmp/blah.tmp" } };
-	BOOST_REQUIRE( tmp );
-	tmp.secure_create_file( );
-	std::cout << "Temp file: " << *tmp << std::endl;
-	std::ofstream out_file{ tmp->string( ), std::ios::trunc };
-	out_file << "Test passed\n";
-	out_file.close( );
-}
 
 BOOST_AUTO_TEST_CASE( delete_on_exit_test_005 ) {
 	daw::delete_on_exit tmp;
