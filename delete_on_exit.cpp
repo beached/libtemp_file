@@ -21,24 +21,8 @@
 // SOFTWARE.
 
 #include <boost/filesystem.hpp>
-#include <cstdlib>
-#include <iostream>
-#include <mutex>
-#include <thread>
-#include <unordered_set>
 
 #include "delete_on_exit.h"
-
-namespace std {
-	template<>
-	class hash<boost::filesystem::path> {
-		std::hash<std::string> m_hash;
-		public:
-		auto operator()( boost::filesystem::path const & path ) const {
-			return m_hash( path.string( ) );
-		}
-	};	// hash
-}
 
 namespace daw {
 	namespace impl {
@@ -63,12 +47,10 @@ namespace daw {
 
 			~scoped_delete_on_exit( ) {
 				try {
-					if( path != boost::filesystem::path{ } && exists( path ) ) {
+					if( !path.empty( ) && exists( path ) ) {
 						remove( path );
 					}
-				} catch( std::exception const & ex ) {
-					std::cerr << "Exception while removing tmp files: " << ex.what( ) << std::endl;
-				}
+				} catch( std::exception const & ) { }
 			}
 
 		};	// scoped_delete_on_exit
@@ -115,7 +97,7 @@ namespace daw {
 	}
 
 	delete_on_exit::operator bool( ) const {
-		return m_path && get( ) != boost::filesystem::path{ };
+		return m_path && !get( ).empty( );
 	}
 
 	delete_on_exit::operator boost::filesystem::path const & ( ) const {
@@ -134,10 +116,7 @@ namespace daw {
 	}
 
 	bool delete_on_exit::empty( ) const {
-		if( m_path ) {
-			return get( ) == boost::filesystem::path{ };
-		}
-		return true;
+		return !m_path || get( ).empty( );
 	}
 }    // namespace daw
 
