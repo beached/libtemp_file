@@ -33,6 +33,7 @@
 BOOST_AUTO_TEST_CASE( delete_on_exit_test_002 ) {
 	daw::delete_on_exit tmp;
 	BOOST_REQUIRE( tmp );
+	tmp.secure_create( );
 	std::cout << "Temp file: " << *tmp << std::endl;
 	std::ofstream out_file{ tmp->string( ), std::ios::trunc };
 	out_file << "Test failed\n";
@@ -43,6 +44,7 @@ BOOST_AUTO_TEST_CASE( delete_on_exit_test_003 ) {
 	daw::delete_on_exit tmp;
 	BOOST_REQUIRE( tmp );
 	std::cout << "Temp file: " << *tmp << std::endl;
+	tmp.secure_create( );
 	std::ofstream out_file{ tmp->string( ), std::ios::trunc };
 	out_file << "Test passed\n";
 	out_file.close( );
@@ -52,6 +54,7 @@ BOOST_AUTO_TEST_CASE( delete_on_exit_test_003 ) {
 BOOST_AUTO_TEST_CASE( delete_on_exit_test_004 ) {
 	daw::delete_on_exit tmp{ { "/tmp/blah.tmp" } };
 	BOOST_REQUIRE( tmp );
+	tmp.secure_create( );
 	std::cout << "Temp file: " << *tmp << std::endl;
 	std::ofstream out_file{ tmp->string( ), std::ios::trunc };
 	out_file << "Test passed\n";

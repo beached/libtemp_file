@@ -59,6 +59,7 @@ namespace daw {
 		explicit operator boost::filesystem::path & ( );
 		bool empty( ) const;
 		std::string string( ) const;
+		void secure_create( ) const;
 	};	// delete_on_exit
 }    // namespace daw
 

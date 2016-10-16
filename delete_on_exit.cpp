@@ -21,6 +21,9 @@
 // SOFTWARE.
 
 #include <boost/filesystem.hpp>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "delete_on_exit.h"
 
@@ -91,7 +94,8 @@ namespace daw {
 
 	boost::filesystem::path delete_on_exit::disconnect( ) {
 		if( m_path ) {
-			return m_path->disconnect( );
+			auto result = m_path->disconnect( );
+			return result;
 		}
 		return boost::filesystem::path{ };
 	}
@@ -117,6 +121,20 @@ namespace daw {
 
 	bool delete_on_exit::empty( ) const {
 		return !m_path || get( ).empty( );
+	}
+
+	void delete_on_exit::secure_create( ) const {
+		if( empty( ) ) {
+			throw std::runtime_error{ "Attempt to create a file from empty path" };
+		}
+		auto result = open( string( ).c_str( ), O_CREAT | O_WRONLY, 00600 );
+		if( result < 0 ) {
+			throw std::runtime_error{ "Could not create temp file" };
+		}
+		close( result );
+		if( !exists( get( ) ) ) {
+			throw std::runtime_error{ "Failed to create temp file" };
+		}
 	}
 }    // namespace daw
 
