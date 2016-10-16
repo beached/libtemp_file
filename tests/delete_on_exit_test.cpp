@@ -31,13 +31,19 @@
 #include "delete_on_exit.h"
 
 BOOST_AUTO_TEST_CASE( delete_on_exit_test_002 ) {
-	daw::delete_on_exit tmp;
-	BOOST_REQUIRE( tmp );
-	tmp.secure_create_file( );
-	std::cout << "Temp file: " << *tmp << std::endl;
-	std::ofstream out_file{ tmp->string( ), std::ios::trunc };
-	out_file << "Test failed\n";
-	out_file.close( );
+	boost::filesystem::path p;
+	{
+		daw::delete_on_exit tmp;
+		BOOST_REQUIRE( tmp );
+		tmp.secure_create_file( );
+		std::cout << "Temp file: " << *tmp << std::endl;
+		std::ofstream out_file{ tmp->string( ), std::ios::trunc };
+		out_file << "Test failed\n";
+		out_file.close( );
+		p = *tmp;
+		BOOST_REQUIRE( exists( p ) );
+	}
+	BOOST_REQUIRE( !exists( p ) );
 }
 
 BOOST_AUTO_TEST_CASE( delete_on_exit_test_003 ) {
@@ -59,12 +65,18 @@ BOOST_AUTO_TEST_CASE( delete_on_exit_test_003 ) {
 
 
 BOOST_AUTO_TEST_CASE( delete_on_exit_test_005 ) {
-	daw::delete_on_exit tmp;
-	BOOST_REQUIRE( tmp );
-	std::cout << "Temp file: " << *tmp << std::endl;
-	auto out_file = tmp.secure_create_stream( );
-	out_file << "Test passed\n";
-	out_file->close( );
+	boost::filesystem::path p;
+	{
+		daw::delete_on_exit tmp;
+		BOOST_REQUIRE( tmp );
+		std::cout << "Temp file: " << *tmp << std::endl;
+		auto out_file = tmp.secure_create_stream( );
+		out_file << "Test passed\n";
+		out_file->close( );
+		p = *tmp;
+		BOOST_REQUIRE( exists( p ) );
+	}
+	BOOST_REQUIRE( !exists( p ) );
 }
 
 
