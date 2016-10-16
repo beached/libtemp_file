@@ -55,6 +55,8 @@ namespace daw {
 		boost::filesystem::path disconnect( );
 
 		explicit operator bool( ) const;
+		explicit operator boost::filesystem::path const & ( ) const;
+		explicit operator boost::filesystem::path & ( );
 		bool empty( ) const;
 		std::string string( ) const;
 	};	// delete_on_exit

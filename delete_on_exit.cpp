@@ -118,6 +118,14 @@ namespace daw {
 		return m_path && get( ) != boost::filesystem::path{ };
 	}
 
+	delete_on_exit::operator boost::filesystem::path const & ( ) const {
+		return get( );
+	}
+
+	delete_on_exit::operator boost::filesystem::path & ( ) {
+		return get( );
+	}
+
 	std::string delete_on_exit::string( ) const {
 		if( m_path ) {
 			return get( ).string( );
