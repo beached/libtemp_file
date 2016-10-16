@@ -61,7 +61,7 @@ namespace daw {
 				return std::exchange( path, boost::filesystem::path{ } );
 			}
 
-			~scoped_delete_on_exit( ) noexcept {
+			~scoped_delete_on_exit( ) {
 				try {
 					if( path != boost::filesystem::path{ } && exists( path ) ) {
 						remove( path );
@@ -116,6 +116,13 @@ namespace daw {
 
 	delete_on_exit::operator bool( ) const {
 		return m_path && get( ) != boost::filesystem::path{ };
+	}
+
+	std::string delete_on_exit::string( ) const {
+		if( m_path ) {
+			return get( ).string( );
+		}
+		return std::string{ };
 	}
 
 	bool delete_on_exit::empty( ) const {

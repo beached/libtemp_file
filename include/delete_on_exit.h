@@ -56,6 +56,7 @@ namespace daw {
 
 		explicit operator bool( ) const;
 		bool empty( ) const;
+		std::string string( ) const;
 	};	// delete_on_exit
 }    // namespace daw
 
