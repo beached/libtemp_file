@@ -21,6 +21,9 @@
 // SOFTWARE.
 
 #include <boost/filesystem.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/stream_buffer.hpp>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -123,7 +126,14 @@ namespace daw {
 		return !m_path || get( ).empty( );
 	}
 
-	void delete_on_exit::secure_create( ) const {
+	int delete_on_exit::secure_create_fd( ) const {
+		if( empty( ) ) {
+			throw std::runtime_error{ "Attempt to create a file from empty path" };
+		}
+		return open( string( ).c_str( ), O_CREAT | O_RDWR | O_EXCL, 00600 );
+	}
+
+	void delete_on_exit::secure_create_file( ) const {
 		if( empty( ) ) {
 			throw std::runtime_error{ "Attempt to create a file from empty path" };
 		}
@@ -135,6 +145,17 @@ namespace daw {
 		if( !exists( get( ) ) ) {
 			throw std::runtime_error{ "Failed to create temp file" };
 		}
+	}
+
+	std::unique_ptr<delete_on_exit::stream> delete_on_exit::secure_create_stream( ) const {
+		auto fd = secure_create_fd( );
+		if( fd < 0 ) {
+			throw std::runtime_error{ "Could not create temp file" };
+		}
+		if( !exists( get( ) ) ) {
+			throw std::runtime_error{ "Failed to create temp file" };
+		}
+		return std::make_unique<stream>( fd, boost::iostreams::file_descriptor_flags::close_handle );
 	}
 }    // namespace daw
 

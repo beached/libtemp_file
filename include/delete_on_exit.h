@@ -23,6 +23,9 @@
 #pragma once
 
 #include <boost/filesystem/path.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/stream_buffer.hpp>
 #include <memory>
 
 namespace daw {
@@ -58,8 +61,31 @@ namespace daw {
 		explicit operator boost::filesystem::path const & ( ) const;
 		explicit operator boost::filesystem::path & ( );
 		bool empty( ) const;
+
+		/// @brief string representation of the tempory file name/path
 		std::string string( ) const;
-		void secure_create( ) const;
+
+		/// @brief return a file descriptor for a file created with exclusive RW access and 00600 permissions.  Caller must close descriptor
+		int secure_create_fd( ) const;
+
+		/// @brief create file with 00600 permissions
+		void secure_create_file( ) const;
+
+		using stream = boost::iostreams::stream<boost::iostreams::file_descriptor>; 
+		/// @brief return a stream with exclusive RW access and 00600 permissions.  File will close when result goes out of scope 
+		std::unique_ptr<stream> secure_create_stream( ) const;
 	};	// delete_on_exit
 }    // namespace daw
+
+template<typename T>
+std::unique_ptr<daw::delete_on_exit::stream> & operator<<( std::unique_ptr<daw::delete_on_exit::stream> & os, T const & value ) {
+	*os << value;
+	return os;
+}
+
+template<typename T>
+std::unique_ptr<daw::delete_on_exit::stream> & operator>>( std::unique_ptr<daw::delete_on_exit::stream> & is, T & value ) {
+	*is >> value;
+	return is;
+}
 

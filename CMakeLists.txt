@@ -4,7 +4,7 @@ project( libdelete_on_exit_prj )
 
 include( ExternalProject )
 
-find_package( Boost 1.58.0 COMPONENTS system filesystem unit_test_framework REQUIRED )
+find_package( Boost 1.58.0 COMPONENTS system filesystem iostreams unit_test_framework REQUIRED )
 
 add_definitions( -DBOOST_TEST_DYN_LINK ) 
 
