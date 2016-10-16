@@ -6,6 +6,7 @@ include( ExternalProject )
 
 find_package( Boost 1.58.0 COMPONENTS system filesystem iostreams unit_test_framework REQUIRED )
 
+enable_testing( )
 add_definitions( -DBOOST_TEST_DYN_LINK ) 
 
 if( ${CMAKE_CXX_COMPILER_ID} STREQUAL 'MSVC' )
@@ -30,7 +31,7 @@ set( HEADER_FILES
 
 set( SOURCE_FILES
 	${SOURCE_FOLDER}/delete_on_exit.cpp
- )
+)
 
 include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
 link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
