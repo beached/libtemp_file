@@ -25,6 +25,7 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
 #include <fcntl.h>
+#include <io.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -130,18 +131,30 @@ namespace daw {
 		if( empty( ) ) {
 			throw std::runtime_error{ "Attempt to create a file from empty path" };
 		}
+		#ifdef WIN32
+		#define open _open
+		#endif
 		return open( string( ).c_str( ), O_CREAT | O_RDWR | O_EXCL, 00600 );
+		#ifdef WIN32
+		#undef open
+		#endif
 	}
 
 	void delete_on_exit::secure_create_file( ) const {
 		if( empty( ) ) {
 			throw std::runtime_error{ "Attempt to create a file from empty path" };
 		}
-		auto result = open( string( ).c_str( ), O_CREAT | O_WRONLY | O_EXCL, 00600 );
+		auto result = _open( string( ).c_str( ), O_CREAT | O_WRONLY | O_EXCL, 00600 );
 		if( result < 0 ) {
 			throw std::runtime_error{ "Could not create temp file" };
 		}
+		#ifdef WIN32
+		#define close _close
+		#endif
 		close( result );
+		#ifdef WIN32
+		#undef close
+		#endif
 		if( !exists( get( ) ) ) {
 			throw std::runtime_error{ "Failed to create temp file" };
 		}
