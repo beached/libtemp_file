@@ -79,4 +79,19 @@ BOOST_AUTO_TEST_CASE( delete_on_exit_test_005 ) {
 	BOOST_REQUIRE( !exists( p ) );
 }
 
+BOOST_AUTO_TEST_CASE( delete_on_exit_test_006 ) {
+	boost::filesystem::path p{ "./" };
+	{
+		daw::delete_on_exit tmp{ p };
+		BOOST_REQUIRE( tmp );
+		std::cout << "Temp file: " << *tmp << std::endl;
+		auto out_file = tmp.secure_create_stream( );
+		out_file << "Test passed\n";
+		out_file->close( );
+		p = *tmp;
+		BOOST_REQUIRE( exists( p ) );
+	}
+	BOOST_REQUIRE( !exists( p ) );
+}
+
 

@@ -42,8 +42,8 @@
 namespace daw {
 	namespace impl {
 		namespace {
-			auto generate_temp_file_path( ) {
-				return boost::filesystem::temp_directory_path( ) / boost::filesystem::unique_path( ).replace_extension( ".tmp" );
+			auto generate_temp_file_path( boost::filesystem::path temp_folder = boost::filesystem::temp_directory_path( ) ) {
+				return temp_folder / boost::filesystem::unique_path( ).replace_extension( ".tmp" );
 			}
 		}	// namespace anonymous
 		
@@ -54,7 +54,7 @@ namespace daw {
 				path{ generate_temp_file_path( ) } { }
 
 			scoped_delete_on_exit( boost::filesystem::path p ):
-				path{ std::move( p ) } { }
+				path{ is_directory( p ) ? generate_temp_file_path( p ) : std::move( p ) } { }
 
 			boost::filesystem::path disconnect( ) {
 				return std::exchange( path, boost::filesystem::path{ } );
@@ -82,7 +82,6 @@ namespace daw {
 	delete_on_exit::delete_on_exit( ):
 			m_path{ std::make_shared<daw::impl::scoped_delete_on_exit>( ) } { }
 
-	
 	delete_on_exit::delete_on_exit( boost::filesystem::path p ):
 			m_path{ std::make_shared<daw::impl::scoped_delete_on_exit>( std::move( p ) ) } { }
 
@@ -110,6 +109,12 @@ namespace daw {
 			return result;
 		}
 		return boost::filesystem::path{ };
+	}
+
+	void delete_on_exit::remove( ) {
+		if( !empty( ) ) {
+			boost::filesystem::remove( get( ) );
+		}
 	}
 
 	delete_on_exit::operator bool( ) const {

@@ -41,25 +41,43 @@ namespace daw {
 		boost::filesystem::path & get( );
 		boost::filesystem::path const & get( ) const;
 	public:
+		/// @brief Create a non-predicable file name in the temp folder
 		delete_on_exit( );
+
+		/// @brief Attach an existing path to delete on scope exit, or if a folder is passed use that as temporary folder with a random file name
 		delete_on_exit( boost::filesystem::path p );
+
 		delete_on_exit( delete_on_exit const & ) = default;
 		delete_on_exit( delete_on_exit && ) = default;
 		delete_on_exit & operator=( delete_on_exit const & ) = default;
 		delete_on_exit & operator=( delete_on_exit && ) = default;
 		~delete_on_exit( );
 
+		/// @brief Get file path
 		boost::filesystem::path & operator*( );
+		
+		/// @brief Get file path
 		boost::filesystem::path const & operator*( ) const;
+
+		/// @brief access path members
 		boost::filesystem::path const * operator->( ) const;
+		
+		/// @brief access path members
 		boost::filesystem::path * operator->( );
 
 		///	@brief Return path object and do not delete it on exit
 		boost::filesystem::path disconnect( );
 
+		/// @brief Remove file and make path empty
+		void remove( );
+
+		/// @brief Is a non-empty path stored
 		explicit operator bool( ) const;
+
 		explicit operator boost::filesystem::path const & ( ) const;
 		explicit operator boost::filesystem::path & ( );
+
+		/// @brief Has object been removed
 		bool empty( ) const;
 
 		/// @brief string representation of the tempory file name/path
