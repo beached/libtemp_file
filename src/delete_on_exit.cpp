@@ -143,10 +143,7 @@ namespace daw {
 	}
 
 	void delete_on_exit::secure_create_file( ) const {
-		if( empty( ) ) {
-			throw std::runtime_error{ "Attempt to create a file from empty path" };
-		}
-		auto result = fileopen( string( ).c_str( ), O_CREAT | O_WRONLY | O_EXCL, 00600 );
+		auto result = secure_create_fd( );
 		if( result < 0 ) {
 			throw std::runtime_error{ "Could not create temp file" };
 		}
