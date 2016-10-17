@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 2.8.12 )
 
-project( libdelete_on_exit_prj )
+project( libtemp_file_prj )
 
 include( ExternalProject )
 
@@ -26,11 +26,11 @@ set( TEST_FOLDER "tests" )
 include_directories( ${HEADER_FOLDER} )
 
 set( HEADER_FILES
-	${HEADER_FOLDER}/delete_on_exit.h
+	${HEADER_FOLDER}/temp_file.h
 )
 
 set( SOURCE_FILES
-	${SOURCE_FOLDER}/delete_on_exit.cpp
+	${SOURCE_FOLDER}/temp_file.cpp
 )
 
 include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
@@ -39,12 +39,12 @@ link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 link_directories( ${Boost_LIBRARY_DIRS} )
 
-add_library( delete_on_exit ${HEADER_FILES} ${SOURCE_FILES} )
-target_link_libraries( delete_on_exit ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
+add_library( temp_file ${HEADER_FILES} ${SOURCE_FILES} )
+target_link_libraries( temp_file ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
 
-add_executable( delete_on_exit_test_bin ${HEADER_FILES} ${TEST_FOLDER}/delete_on_exit_test.cpp )
-target_link_libraries( delete_on_exit_test_bin delete_on_exit ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
-add_test( delete_on_exit_test, delete_on_exit_test_bin )
+add_executable( temp_file_test_bin ${HEADER_FILES} ${TEST_FOLDER}/temp_file_test.cpp )
+target_link_libraries( temp_file_test_bin temp_file ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
+add_test( temp_file_test, temp_file_test_bin )
 
-install( TARGETS delete_on_exit DESTINATION lib )
+install( TARGETS temp_file DESTINATION lib )
 install( DIRECTORY ${HEADER_FOLDER}/ DESTINATION include/daw )
