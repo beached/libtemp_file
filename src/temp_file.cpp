@@ -29,6 +29,7 @@
 #include <io.h>
 #define fileopen _open
 #define fileclose _close
+#define mode_t int
 #else
 #define fileopen open
 #define fileclose close
