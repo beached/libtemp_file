@@ -99,6 +99,8 @@ namespace daw {
 
 		/// @brief Attach an existing path to delete on scope exit, or if a folder is passed use that as temporary folder with a random file name
 		shared_temp_file( boost::filesystem::path p );
+		shared_temp_file( unique_temp_file && tmp );
+		shared_temp_file & operator=( unique_temp_file && rhs );
 
 		shared_temp_file( shared_temp_file const & ) = default;
 		shared_temp_file( shared_temp_file && ) = default;

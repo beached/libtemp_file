@@ -148,6 +148,15 @@ namespace daw {
 	shared_temp_file::shared_temp_file( boost::filesystem::path p ):
 			m_path{ std::make_shared<unique_temp_file>( std::move( p ) ) } { }
 
+	shared_temp_file::shared_temp_file( unique_temp_file && tmp ):
+		m_path{ std::make_shared<unique_temp_file>( std::move( tmp ) ) } { }
+
+	shared_temp_file & shared_temp_file::operator=( unique_temp_file && rhs ) {
+		m_path.reset( );
+		m_path = std::make_shared<unique_temp_file>( std::move( rhs ) );	
+		return *this;
+	}
+
 	shared_temp_file::~shared_temp_file( ) { }
 
 	namespace {
