@@ -39,8 +39,17 @@
 #include "temp_file.h"
 
 
+
+
 namespace daw {
 	namespace {
+	constexpr mode_t sec_perm( ) {
+#ifdef WIN32
+		return _S_IREAD | _S_IWRITE;
+#else
+		return	S_IRUSR | S_IWUSR; 
+#endif
+	}
 		auto generate_temp_file_path( boost::filesystem::path temp_folder = boost::filesystem::temp_directory_path( ) ) {
 			return temp_folder / boost::filesystem::unique_path( ).replace_extension( ".tmp" );
 		}
@@ -93,29 +102,23 @@ namespace daw {
 		if( empty( ) ) {
 			throw std::runtime_error{ "Attempt to create a file from empty path" };
 		}
-		return fileopen( string( ).c_str( ), O_CREAT | O_RDWR | O_EXCL, 00600 );
+		auto fd = fileopen( string( ).c_str( ), O_CREAT | O_RDWR | O_EXCL, sec_perm( ) );
+		if( fd < 0 ) {
+			throw std::runtime_error{ "Could not create temp file" };
+		} else if( !exists( m_path ) ) {
+			throw std::runtime_error{ "Failed to create temp file" };
+		} else if( !is_regular_file( m_path ) ) {
+			throw std::runtime_error( "Temp file was not a regular file.  This should never happen as the file was to be uniquely named" );
+		}
+		return fd;
 	}
 
 	void unique_temp_file::secure_create_file( ) const {
-		auto result = secure_create_fd( );
-		if( result < 0 ) {
-			throw std::runtime_error{ "Could not create temp file" };
-		}
-		fileclose( result );
-		if( !exists( m_path ) ) {
-			throw std::runtime_error{ "Failed to create temp file" };
-		}
+		fileclose( secure_create_fd( ) );
 	}
 
 	fd_stream unique_temp_file::secure_create_stream( ) const {
-		auto fd = secure_create_fd( );
-		if( fd < 0 ) {
-			throw std::runtime_error{ "Could not create temp file" };
-		}
-		if( !exists( m_path ) ) {
-			throw std::runtime_error{ "Failed to create temp file" };
-		}
-		return std::make_unique<stream>( fd, boost::iostreams::file_descriptor_flags::close_handle );
+		return std::make_unique<stream>( secure_create_fd( ), boost::iostreams::file_descriptor_flags::close_handle );
 	}
 
 	bool operator==( unique_temp_file const & lhs, unique_temp_file const & rhs ) {
