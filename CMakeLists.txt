@@ -37,6 +37,9 @@ set( SOURCE_FILES
 	${SOURCE_FOLDER}/temp_file.cpp
 )
 
+#set( CMAKE_CTEST_COMMAND ctest -V )
+add_custom_target( check COMMAND ${CMAKE_CTEST_COMMAND} )
+
 include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
 link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
 
@@ -46,9 +49,10 @@ link_directories( ${Boost_LIBRARY_DIRS} )
 add_library( temp_file ${HEADER_FILES} ${SOURCE_FILES} )
 target_link_libraries( temp_file ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
 
-add_executable( temp_file_test_bin ${HEADER_FILES} ${TEST_FOLDER}/temp_file_test.cpp )
+add_executable( temp_file_test_bin EXCLUDE_FROM_ALL ${HEADER_FILES} ${TEST_FOLDER}/temp_file_test.cpp )
 target_link_libraries( temp_file_test_bin temp_file ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
 add_test( temp_file_test, temp_file_test_bin )
+add_dependencies( check temp_file_test_bin )
 
 install( TARGETS temp_file DESTINATION lib )
 install( DIRECTORY ${HEADER_FOLDER}/ DESTINATION include/daw )
