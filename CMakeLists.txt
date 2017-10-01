@@ -7,7 +7,7 @@ include( ExternalProject )
 find_package( Boost 1.58.0 COMPONENTS system filesystem iostreams unit_test_framework REQUIRED )
 
 enable_testing( )
-add_definitions( -DBOOST_TEST_DYN_LINK ) 
+add_definitions( -DBOOST_TEST_DYN_LINK -DBOOST_ALL_NO_LIB -DBOOST_ALL_DYN_LINK ) 
 
 if( ${CMAKE_CXX_COMPILER_ID} STREQUAL 'MSVC' )
 	add_compile_options( -D_WIN32_WINNT=0x0601 /std:c++latest ) 
