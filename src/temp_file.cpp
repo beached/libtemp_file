@@ -154,7 +154,7 @@ namespace daw {
 
 	shared_temp_file & shared_temp_file::operator=( unique_temp_file && rhs ) {
 		m_path.reset( );
-		m_path = std::make_shared<unique_temp_file>( std::move( rhs.disconnect( ) ) );	
+		m_path = std::make_shared<unique_temp_file>( rhs.disconnect( ) );	
 		return *this;
 	}
 
