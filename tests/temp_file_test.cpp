@@ -28,7 +28,7 @@
 #include <iostream>
 #include <iterator>
 
-#include "temp_file.h"
+#include "daw/temp_file.h"
 
 BOOST_AUTO_TEST_CASE( shared_temp_file_test_002 ) {
 	boost::filesystem::path p;

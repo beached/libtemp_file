@@ -28,7 +28,7 @@ set( TEST_FOLDER "tests" )
 include_directories( ${HEADER_FOLDER} )
 
 set( HEADER_FILES
-	${HEADER_FOLDER}/temp_file.h
+	${HEADER_FOLDER}/daw/temp_file.h
 )
 
 set( SOURCE_FILES
@@ -53,4 +53,4 @@ add_test( temp_file_test, temp_file_test_bin )
 add_dependencies( check temp_file_test_bin )
 
 install( TARGETS temp_file DESTINATION lib )
-install( DIRECTORY ${HEADER_FOLDER}/ DESTINATION include/daw )
+install( DIRECTORY ${HEADER_FOLDER}/ DESTINATION include )
