@@ -2,8 +2,6 @@ cmake_minimum_required( VERSION 2.8.12 )
 
 project( libtemp_file_prj )
 
-include( ExternalProject )
-
 find_package( Boost 1.58.0 COMPONENTS system filesystem iostreams unit_test_framework REQUIRED )
 
 enable_testing( )
