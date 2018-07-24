@@ -51,10 +51,10 @@ namespace daw {
 		unique_temp_file &operator=( unique_temp_file && ) = default;
 
 		/// @brief Get file path
-		boost::filesystem::path const &operator*( ) const;
+		boost::filesystem::path const &operator*( ) const noexcept;
 
 		/// @brief access path members
-		boost::filesystem::path const *operator->( ) const;
+		boost::filesystem::path const *operator->( ) const noexcept;
 
 		///	@brief Return path object and do not delete it on exit
 		boost::filesystem::path disconnect( );
@@ -63,16 +63,16 @@ namespace daw {
 		void remove( );
 
 		/// @brief Is a non-empty path stored
-		explicit operator bool( ) const;
+		explicit operator bool( ) const noexcept;
 
-		explicit operator boost::filesystem::path const &( ) const;
-		explicit operator boost::filesystem::path &( );
+		explicit operator boost::filesystem::path const &( ) const noexcept;
+		explicit operator boost::filesystem::path &( ) noexcept;
 
 		/// @brief Has object been removed
-		bool empty( ) const;
+		bool empty( ) const noexcept;
 
 		/// @brief string representation of the tempory file name/path
-		std::string string( ) const;
+		std::string string( ) const noexcept;
 
 		/// @brief return a file descriptor for a file created with exclusive RW
 		/// access and 00600 permissions.  Caller must close descriptor
@@ -87,17 +87,17 @@ namespace daw {
 		fd_stream secure_create_stream( ) const;
 
 		friend bool operator==( unique_temp_file const &lhs,
-		                        unique_temp_file const &rhs );
+		                        unique_temp_file const &rhs ) noexcept;
 		friend bool operator!=( unique_temp_file const &lhs,
-		                        unique_temp_file const &rhs );
+		                        unique_temp_file const &rhs ) noexcept;
 		friend bool operator<( unique_temp_file const &lhs,
-		                       unique_temp_file const &rhs );
+		                       unique_temp_file const &rhs ) noexcept;
 		friend bool operator>( unique_temp_file const &lhs,
-		                       unique_temp_file const &rhs );
+		                       unique_temp_file const &rhs ) noexcept;
 		friend bool operator<=( unique_temp_file const &lhs,
-		                        unique_temp_file const &rhs );
+		                        unique_temp_file const &rhs ) noexcept;
 		friend bool operator>=( unique_temp_file const &lhs,
-		                        unique_temp_file const &rhs );
+		                        unique_temp_file const &rhs ) noexcept;
 	}; // unique_temp_file
 
 	/// @brief Constructs a shareable temp file path that can be copied and moved.
@@ -117,29 +117,23 @@ namespace daw {
 		explicit shared_temp_file( unique_temp_file &&tmp );
 		shared_temp_file &operator=( unique_temp_file &&rhs );
 
-		shared_temp_file( shared_temp_file const & ) = default;
-		shared_temp_file( shared_temp_file && ) = default;
-		shared_temp_file &operator=( shared_temp_file const & ) = default;
-		shared_temp_file &operator=( shared_temp_file && ) = default;
-		~shared_temp_file( );
-
 		/// @brief Get file path
-		boost::filesystem::path const &operator*( ) const;
+		boost::filesystem::path const &operator*( ) const noexcept;
 
 		/// @brief access path members
-		boost::filesystem::path const *operator->( ) const;
+		boost::filesystem::path const *operator->( ) const noexcept;
 
 		///	@brief Return path object and do not delete it on exit
 		boost::filesystem::path disconnect( );
 
 		/// @brief Is a non-empty path stored
-		explicit operator bool( ) const;
+		explicit operator bool( ) const noexcept;
 
 		/// @brief Has object been removed
-		bool empty( ) const;
+		bool empty( ) const noexcept;
 
 		/// @brief string representation of the tempory file name/path
-		std::string string( ) const;
+		std::string string( ) const noexcept;
 
 		/// @brief return a file descriptor for a file created with exclusive RW
 		/// access and 00600 permissions.  Caller must close descriptor
@@ -153,17 +147,17 @@ namespace daw {
 		fd_stream secure_create_stream( ) const;
 
 		friend bool operator==( shared_temp_file const &lhs,
-		                        shared_temp_file const &rhs );
+		                        shared_temp_file const &rhs ) noexcept;
 		friend bool operator!=( shared_temp_file const &lhs,
-		                        shared_temp_file const &rhs );
+		                        shared_temp_file const &rhs ) noexcept;
 		friend bool operator<( shared_temp_file const &lhs,
-		                       shared_temp_file const &rhs );
+		                       shared_temp_file const &rhs ) noexcept;
 		friend bool operator>( shared_temp_file const &lhs,
-		                       shared_temp_file const &rhs );
+		                       shared_temp_file const &rhs ) noexcept;
 		friend bool operator<=( shared_temp_file const &lhs,
-		                        shared_temp_file const &rhs );
+		                        shared_temp_file const &rhs ) noexcept;
 		friend bool operator>=( shared_temp_file const &lhs,
-		                        shared_temp_file const &rhs );
+		                        shared_temp_file const &rhs ) noexcept;
 	}; // shared_temp_file
 } // namespace daw
 

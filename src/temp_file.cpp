@@ -62,11 +62,11 @@ namespace daw {
 	} // namespace
 
 	unique_temp_file::unique_temp_file( )
-	  : m_path{generate_temp_file_path( )} {}
+	  : m_path( generate_temp_file_path( ) ) {}
 
 	unique_temp_file::unique_temp_file( boost::filesystem::path p )
-	  : m_path{is_directory( p ) ? generate_temp_file_path( p )
-	                             : std::move( p )} {}
+	  : m_path( is_directory( p ) ? generate_temp_file_path( p )
+	                              : std::move( p ) ) {}
 
 	boost::filesystem::path unique_temp_file::disconnect( ) {
 		return std::exchange( m_path, boost::filesystem::path{} );
@@ -78,11 +78,12 @@ namespace daw {
 		} catch( std::exception const & ) {}
 	}
 
-	boost::filesystem::path const &unique_temp_file::operator*( ) const {
+	boost::filesystem::path const &unique_temp_file::operator*( ) const noexcept {
 		return m_path;
 	}
 
-	boost::filesystem::path const *unique_temp_file::operator->( ) const {
+	boost::filesystem::path const *unique_temp_file::operator->( ) const
+	  noexcept {
 		return &m_path;
 	}
 
@@ -93,15 +94,15 @@ namespace daw {
 		}
 	}
 
-	unique_temp_file::operator bool( ) const {
+	unique_temp_file::operator bool( ) const noexcept {
 		return !empty( );
 	}
 
-	std::string unique_temp_file::string( ) const {
+	std::string unique_temp_file::string( ) const noexcept {
 		return m_path.string( );
 	}
 
-	bool unique_temp_file::empty( ) const {
+	bool unique_temp_file::empty( ) const noexcept {
 		return m_path.empty( );
 	}
 
@@ -133,38 +134,44 @@ namespace daw {
 		  boost::iostreams::file_descriptor_flags::close_handle );
 	}
 
-	bool operator==( unique_temp_file const &lhs, unique_temp_file const &rhs ) {
+	bool operator==( unique_temp_file const &lhs,
+	                 unique_temp_file const &rhs ) noexcept {
 		return *lhs == *rhs;
 	}
 
-	bool operator!=( unique_temp_file const &lhs, unique_temp_file const &rhs ) {
+	bool operator!=( unique_temp_file const &lhs,
+	                 unique_temp_file const &rhs ) noexcept {
 		return *lhs != *rhs;
 	}
 
-	bool operator<( unique_temp_file const &lhs, unique_temp_file const &rhs ) {
+	bool operator<( unique_temp_file const &lhs,
+	                unique_temp_file const &rhs ) noexcept {
 		return *lhs < *rhs;
 	}
 
-	bool operator>( unique_temp_file const &lhs, unique_temp_file const &rhs ) {
+	bool operator>( unique_temp_file const &lhs,
+	                unique_temp_file const &rhs ) noexcept {
 		return *lhs > *rhs;
 	}
 
-	bool operator<=( unique_temp_file const &lhs, unique_temp_file const &rhs ) {
+	bool operator<=( unique_temp_file const &lhs,
+	                 unique_temp_file const &rhs ) noexcept {
 		return *lhs <= *rhs;
 	}
 
-	bool operator>=( unique_temp_file const &lhs, unique_temp_file const &rhs ) {
+	bool operator>=( unique_temp_file const &lhs,
+	                 unique_temp_file const &rhs ) noexcept {
 		return *lhs >= *rhs;
 	}
 
 	shared_temp_file::shared_temp_file( )
-	  : m_path{std::make_shared<unique_temp_file>( )} {}
+	  : m_path( std::make_shared<unique_temp_file>( ) ) {}
 
 	shared_temp_file::shared_temp_file( boost::filesystem::path p )
-	  : m_path{std::make_shared<unique_temp_file>( std::move( p ) )} {}
+	  : m_path( std::make_shared<unique_temp_file>( std::move( p ) ) ) {}
 
 	shared_temp_file::shared_temp_file( unique_temp_file &&tmp )
-	  : m_path{std::make_shared<unique_temp_file>( tmp.disconnect( ) )} {}
+	  : m_path( std::make_shared<unique_temp_file>( tmp.disconnect( ) ) ) {}
 
 	shared_temp_file &shared_temp_file::operator=( unique_temp_file &&rhs ) {
 		m_path.reset( );
@@ -172,19 +179,17 @@ namespace daw {
 		return *this;
 	}
 
-	shared_temp_file::~shared_temp_file( ) {}
-
 	namespace {
-		boost::filesystem::path const &get( unique_temp_file const &tmp ) {
+		boost::filesystem::path const &get( unique_temp_file const &tmp ) noexcept {
 			return *tmp;
 		}
 	} // namespace
 
-	boost::filesystem::path const &shared_temp_file::operator*( ) const {
+	boost::filesystem::path const &shared_temp_file::operator*( ) const noexcept {
 		return get( *m_path );
 	}
 
-	boost::filesystem::path const *shared_temp_file::operator->( ) const {
+	boost::filesystem::path const *shared_temp_file::operator->( ) const noexcept {
 		return &get( *m_path );
 	}
 
@@ -192,18 +197,18 @@ namespace daw {
 		return m_path->disconnect( );
 	}
 
-	shared_temp_file::operator bool( ) const {
+	shared_temp_file::operator bool( ) const noexcept {
 		return !empty( );
 	}
 
-	std::string shared_temp_file::string( ) const {
+	std::string shared_temp_file::string( ) const noexcept {
 		if( m_path ) {
 			return m_path->string( );
 		}
 		return std::string{};
 	}
 
-	bool shared_temp_file::empty( ) const {
+	bool shared_temp_file::empty( ) const noexcept {
 		return !m_path || m_path->empty( );
 	}
 
@@ -219,27 +224,33 @@ namespace daw {
 		return m_path->secure_create_stream( );
 	}
 
-	bool operator==( shared_temp_file const &lhs, shared_temp_file const &rhs ) {
+	bool operator==( shared_temp_file const &lhs,
+	                 shared_temp_file const &rhs ) noexcept {
 		return *lhs == *rhs;
 	}
 
-	bool operator!=( shared_temp_file const &lhs, shared_temp_file const &rhs ) {
+	bool operator!=( shared_temp_file const &lhs,
+	                 shared_temp_file const &rhs ) noexcept {
 		return *lhs != *rhs;
 	}
 
-	bool operator<( shared_temp_file const &lhs, shared_temp_file const &rhs ) {
+	bool operator<( shared_temp_file const &lhs,
+	                shared_temp_file const &rhs ) noexcept {
 		return *lhs < *rhs;
 	}
 
-	bool operator>( shared_temp_file const &lhs, shared_temp_file const &rhs ) {
+	bool operator>( shared_temp_file const &lhs,
+	                shared_temp_file const &rhs ) noexcept {
 		return *lhs > *rhs;
 	}
 
-	bool operator<=( shared_temp_file const &lhs, shared_temp_file const &rhs ) {
+	bool operator<=( shared_temp_file const &lhs,
+	                 shared_temp_file const &rhs ) noexcept {
 		return *lhs <= *rhs;
 	}
 
-	bool operator>=( shared_temp_file const &lhs, shared_temp_file const &rhs ) {
+	bool operator>=( shared_temp_file const &lhs,
+	                 shared_temp_file const &rhs ) noexcept {
 		return *lhs >= *rhs;
 	}
 } // namespace daw
