@@ -3,14 +3,14 @@
 // Copyright (c) 2016-2018 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files( the "Software" ), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
+// of this software and associated documentation files( the "Software" ), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and / or
+// sell copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -53,8 +53,11 @@ namespace daw {
 			return S_IRUSR | S_IWUSR;
 #endif
 		}
-		auto generate_temp_file_path( boost::filesystem::path temp_folder = boost::filesystem::temp_directory_path( ) ) {
-			return temp_folder / boost::filesystem::unique_path( ).replace_extension( ".tmp" );
+		auto
+		generate_temp_file_path( boost::filesystem::path temp_folder =
+		                           boost::filesystem::temp_directory_path( ) ) {
+			return temp_folder /
+			       boost::filesystem::unique_path( ).replace_extension( ".tmp" );
 		}
 	} // namespace
 
@@ -62,7 +65,8 @@ namespace daw {
 	  : m_path{generate_temp_file_path( )} {}
 
 	unique_temp_file::unique_temp_file( boost::filesystem::path p )
-	  : m_path{is_directory( p ) ? generate_temp_file_path( p ) : std::move( p )} {}
+	  : m_path{is_directory( p ) ? generate_temp_file_path( p )
+	                             : std::move( p )} {}
 
 	boost::filesystem::path unique_temp_file::disconnect( ) {
 		return std::exchange( m_path, boost::filesystem::path{} );
@@ -105,14 +109,16 @@ namespace daw {
 		if( empty( ) ) {
 			throw std::runtime_error{"Attempt to create a file from empty path"};
 		}
-		auto fd = fileopen( string( ).c_str( ), O_CREAT | O_RDWR | O_EXCL, sec_perm( ) );
+		auto fd =
+		  fileopen( string( ).c_str( ), O_CREAT | O_RDWR | O_EXCL, sec_perm( ) );
 		if( fd < 0 ) {
 			throw std::runtime_error{"Could not create temp file"};
 		} else if( !exists( m_path ) ) {
 			throw std::runtime_error{"Failed to create temp file"};
 		} else if( !is_regular_file( m_path ) ) {
 			throw std::runtime_error(
-			  "Temp file was not a regular file.  This should never happen as the file was to be uniquely named" );
+			  "Temp file was not a regular file.  This should never happen as the "
+			  "file was to be uniquely named" );
 		}
 		return fd;
 	}
@@ -122,7 +128,9 @@ namespace daw {
 	}
 
 	fd_stream unique_temp_file::secure_create_stream( ) const {
-		return std::make_unique<stream>( secure_create_fd( ), boost::iostreams::file_descriptor_flags::close_handle );
+		return std::make_unique<stream>(
+		  secure_create_fd( ),
+		  boost::iostreams::file_descriptor_flags::close_handle );
 	}
 
 	bool operator==( unique_temp_file const &lhs, unique_temp_file const &rhs ) {
@@ -235,4 +243,3 @@ namespace daw {
 		return *lhs >= *rhs;
 	}
 } // namespace daw
-
