@@ -43,9 +43,6 @@ if( GLEAN_INSTALL_ROOT )
 
 	include_directories( SYSTEM "${GLEAN_INSTALL_ROOT}/include" )
 	link_directories( "${GLEAN_INSTALL_ROOT}/lib" )
-else( )
-	include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
-	link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
 endif( )
 
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
