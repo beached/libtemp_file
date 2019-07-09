@@ -37,7 +37,9 @@ set( SOURCE_FILES
 
 #set( CMAKE_CTEST_COMMAND ctest -V )
 add_custom_target( check COMMAND ${CMAKE_CTEST_COMMAND} )
-if( GLEAN_INSTALL_ROOT ) 
+
+option( GLEAN_INSTALL_ROOT "" )
+if( EXISTS "${GLEAN_INSTALL_ROOT}" ) 
 	message( "using glean dependencies" )
 	message( "installing to ${GLEAN_INSTALL_ROOT}" )
 
