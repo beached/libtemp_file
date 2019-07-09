@@ -1,0 +1,6 @@
+{
+	"provides": "libtemp_file",
+	"build_type": "cmake",
+	"dependencies": [
+	]
+}

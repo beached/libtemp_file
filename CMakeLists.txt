@@ -37,9 +37,16 @@ set( SOURCE_FILES
 
 #set( CMAKE_CTEST_COMMAND ctest -V )
 add_custom_target( check COMMAND ${CMAKE_CTEST_COMMAND} )
+if( GLEAN_INSTALL_ROOT ) 
+	message( "using glean dependencies" )
+	message( "installing to ${GLEAN_INSTALL_ROOT}" )
 
-include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
-link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
+	include_directories( SYSTEM "${GLEAN_INSTALL_ROOT}/include" )
+	link_directories( "${GLEAN_INSTALL_ROOT}/lib" )
+else( )
+	include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
+	link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
+endif( )
 
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 link_directories( ${Boost_LIBRARY_DIRS} )
