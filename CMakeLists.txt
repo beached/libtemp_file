@@ -2,6 +2,7 @@ cmake_minimum_required( VERSION 2.8.12 )
 
 project( libtemp_file_prj )
 
+add_definitions( -DBOOST_ALL_NO_LIB ) 
 find_package( Boost 1.62 COMPONENTS system iostreams filesystem REQUIRED )
 
 enable_testing( )
