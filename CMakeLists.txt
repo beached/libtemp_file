@@ -5,7 +5,7 @@ project( libtemp_file_prj )
 find_package( Boost 1.62 COMPONENTS system iostreams filesystem REQUIRED )
 
 enable_testing( )
-add_definitions( -DBOOST_TEST_DYN_LINK -DBOOST_ALL_NO_LIB -DBOOST_ALL_DYN_LINK ) 
+#add_definitions( -DBOOST_TEST_DYN_LINK -DBOOST_ALL_NO_LIB -DBOOST_ALL_DYN_LINK ) 
 
 include( "${CMAKE_SOURCE_DIR}/dependent_projects/CMakeListsCompiler.txt" )
 
