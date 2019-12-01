@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2016-2018 Darrell Wright
+// Copyright (c) 2016-2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -20,37 +20,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#define BOOST_TEST_MODULE glean_test
-
-#include <boost/filesystem.hpp>
-#include <boost/test/unit_test.hpp>
 #include <fstream>
 #include <iostream>
 #include <iterator>
 
+//#include <daw/daw_benchmark.h>
+
 #include "daw/temp_file.h"
 
-BOOST_AUTO_TEST_CASE( shared_temp_file_test_002 ) {
-	boost::filesystem::path p;
+namespace daw {
+	template<typename B>
+	constexpr void expecting( B &&b ) {
+		if( not static_cast<bool>( b ) ) {
+			std::abort( );
+		}
+	}
+
+} // namespace daw
+
+void shared_temp_file_test_001( ) {
+	daw::fs_impl::fs::path p;
 	{
 		daw::shared_temp_file tmp;
-		BOOST_REQUIRE( tmp );
+		daw::expecting( tmp );
 		tmp.secure_create_file( );
 		std::cout << "Temp file: " << *tmp << std::endl;
 		std::ofstream out_file{tmp->string( ), std::ios::trunc};
 		out_file << "Test failed\n";
 		out_file.close( );
 		p = *tmp;
-		BOOST_REQUIRE( exists( p ) );
+		daw::expecting( exists( p ) );
 	}
-	BOOST_REQUIRE( !exists( p ) );
+	daw::expecting( !exists( p ) );
 }
 
-BOOST_AUTO_TEST_CASE( shared_temp_file_test_003 ) {
-	boost::filesystem::path p;
+void shared_temp_file_test_002( ) {
+	daw::fs_impl::fs::path p;
 	{
 		daw::shared_temp_file tmp;
-		BOOST_REQUIRE( tmp );
+		daw::expecting( tmp );
 		std::cout << "Temp file: " << *tmp << std::endl;
 		tmp.secure_create_file( );
 		std::ofstream out_file{tmp->string( ), std::ios::trunc};
@@ -58,37 +66,44 @@ BOOST_AUTO_TEST_CASE( shared_temp_file_test_003 ) {
 		out_file.close( );
 		p = tmp.disconnect( );
 	}
-	BOOST_REQUIRE( exists( p ) );
+	daw::expecting( exists( p ) );
 	remove( p );
-	BOOST_REQUIRE( !exists( p ) );
+	daw::expecting( !exists( p ) );
 }
 
-BOOST_AUTO_TEST_CASE( shared_temp_file_test_005 ) {
-	boost::filesystem::path p;
+void shared_temp_file_test_003( ) {
+	daw::fs_impl::fs::path p;
 	{
 		daw::shared_temp_file tmp;
-		BOOST_REQUIRE( tmp );
+		daw::expecting( tmp );
 		std::cout << "Temp file: " << *tmp << std::endl;
 		auto out_file = tmp.secure_create_stream( );
 		out_file << "Test passed\n";
 		out_file->close( );
 		p = *tmp;
-		BOOST_REQUIRE( exists( p ) );
+		daw::expecting( exists( p ) );
 	}
-	BOOST_REQUIRE( !exists( p ) );
+	daw::expecting( !exists( p ) );
 }
 
-BOOST_AUTO_TEST_CASE( shared_temp_file_test_006 ) {
-	boost::filesystem::path p{"./"};
+void shared_temp_file_test_004( ) {
+	daw::fs_impl::fs::path p{"./"};
 	{
 		daw::shared_temp_file tmp{p};
-		BOOST_REQUIRE( tmp );
+		daw::expecting( tmp );
 		std::cout << "Temp file: " << *tmp << std::endl;
 		auto out_file = tmp.secure_create_stream( );
 		out_file << "Test passed\n";
 		out_file->close( );
 		p = *tmp;
-		BOOST_REQUIRE( exists( p ) );
+		daw::expecting( exists( p ) );
 	}
-	BOOST_REQUIRE( !exists( p ) );
+	daw::expecting( !exists( p ) );
+}
+
+int main( ) {
+	shared_temp_file_test_001( );
+	shared_temp_file_test_002( );
+	shared_temp_file_test_003( );
+	shared_temp_file_test_004( );
 }
