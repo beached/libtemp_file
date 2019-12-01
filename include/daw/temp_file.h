@@ -35,6 +35,12 @@
 #include <sys/types.h>
 #include <utility>
 
+#if defined( __APPLE__ ) and not defined( NO_STD_FS )
+// TODO: Fix
+// I cannot currently get cmake to detect the need for libc++fs
+#define NO_STD_FS
+#endif
+
 #ifndef NO_STD_FS
 #include <filesystem>
 #endif
