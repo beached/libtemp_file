@@ -9,7 +9,7 @@
 cmake_minimum_required( VERSION 3.13 ) 
 
 project( "libtemp_file"
-	VERSION "1.0.0" 
+	VERSION "1.0.1" 
 	DESCRIPTION "Provide an RAII temp file with random naming"
 	HOMEPAGE_URL "https://github.com/beached/libtemp_file"
 	LANGUAGES C CXX)
