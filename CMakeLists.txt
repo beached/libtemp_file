@@ -18,10 +18,7 @@ set( CMAKE_CXX_STANDARD 17 CACHE STRING "The C++ standard whose features are req
 set( CMAKE_CXX_STANDARD_REQUIRED ON)
 set( CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-
 find_package(Boost 1.62 COMPONENTS system iostreams filesystem REQUIRED)
-find_package(Filesystem REQUIRED)
 
 include( GNUInstallDirs)
 set( libtemp_file_INSTALL_CMAKEDIR
@@ -34,7 +31,7 @@ set( PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 add_library( ${PROJECT_NAME} INTERFACE ) 
 add_library( daw::${PROJECT_NAME} ALIAS ${PROJECT_NAME} )
 
-target_link_libraries( ${PROJECT_NAME} INTERFACE std::filesystem Boost::filesystem Boost::system Boost::iostreams ${COMPILER_SPECIFIC_LIBS} )
+target_link_libraries( ${PROJECT_NAME} INTERFACE Boost::filesystem Boost::system Boost::iostreams ${COMPILER_SPECIFIC_LIBS} )
 target_compile_features( ${PROJECT_NAME} INTERFACE cxx_std_17)
 target_include_directories( ${PROJECT_NAME}
 	INTERFACE

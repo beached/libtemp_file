@@ -42,11 +42,7 @@
 
 namespace daw {
 	namespace fs_impl {
-#ifndef NO_STD_FS
 		namespace fs = std::filesystem;
-#else
-		namespace fs = boost::filesystem;
-#endif
 
 		[[nodiscard]] constexpr auto sec_perm( ) {
 #ifdef WIN32
