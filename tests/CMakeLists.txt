@@ -6,6 +6,9 @@
 # Official repository: https://github.com/beached/libtemp_file
 #
 
+set( CMAKE_CXX_STANDARD_REQUIRED ON)
+set( CMAKE_CXX_EXTENSIONS OFF)
+
 add_executable(temp_file_test_bin src/temp_file_test.cpp)
 target_link_libraries(temp_file_test_bin daw::libtemp_file )
 add_test(temp_file_test temp_file_test_bin)

@@ -15,21 +15,12 @@
 #include <boost/iostreams/stream_buffer.hpp>
 #include <exception>
 #include <fcntl.h>
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <utility>
-
-#if defined( __APPLE__ ) and not defined( NO_STD_FS )
-// TODO: Fix
-// I cannot currently get cmake to detect the need for libc++fs
-#define NO_STD_FS
-#endif
-
-#ifndef NO_STD_FS
-#include <filesystem>
-#endif
 
 #ifdef WIN32
 #include <io.h>
@@ -125,16 +116,15 @@ namespace daw {
 		}
 
 		///	@brief Return path object and do not delete it on exit
-
 		[[nodiscard]] path_type disconnect( ) {
-			return std::exchange( m_path, path_type{} );
+			return std::exchange( m_path, path_type{ } );
 		}
 
 		/// @brief Remove file and make path empty
 		void remove( ) {
 			if( not empty( ) ) {
-				auto tmp = std::exchange( m_path, fs_impl::fs::path{} );
-				fs_impl::fs::remove( tmp );
+				auto tmp = std::exchange( m_path, std::filesystem::path{ } );
+				std::filesystem::remove( tmp );
 			}
 		}
 
@@ -161,14 +151,14 @@ namespace daw {
 		/// access and 00600 permissions.  Caller must close descriptor
 		[[nodiscard]] int secure_create_fd( ) const {
 			if( empty( ) ) {
-				throw std::runtime_error{"Attempt to create a file from empty path"};
+				throw std::runtime_error{ "Attempt to create a file from empty path" };
 			}
 			auto fd = DAW_FILE_OPEN( native( ).c_str( ), O_CREAT | O_RDWR | O_EXCL,
 			                         fs_impl::sec_perm( ) );
 			if( fd < 0 ) {
-				throw std::runtime_error{"Could not create temp file"};
+				throw std::runtime_error{ "Could not create temp file" };
 			} else if( not exists( m_path ) ) {
-				throw std::runtime_error{"Failed to create temp file"};
+				throw std::runtime_error{ "Failed to create temp file" };
 			} else if( not is_regular_file( m_path ) ) {
 				throw std::runtime_error(
 				  "Temp file was not a regular file.  This should never happen as the "
@@ -193,9 +183,9 @@ namespace daw {
 	}; // unique_temp_file
 
 	template<typename Path>
-	unique_temp_file( Path )->unique_temp_file<Path>;
+	unique_temp_file( Path ) -> unique_temp_file<Path>;
 
-	unique_temp_file( )->unique_temp_file<fs_impl::fs::path>;
+	unique_temp_file( ) -> unique_temp_file<std::filesystem::path>;
 
 	template<typename Path>
 	bool operator==( unique_temp_file<Path> const &lhs,
@@ -237,7 +227,7 @@ namespace daw {
 	/// It has the same
 	///			semantics as a shared_ptr and when the last copy goes out of scope the
 	/// file, if 			it exists is deleted.
-	template<typename Path = fs_impl::fs::path>
+	template<typename Path = std::filesystem::path>
 	struct shared_temp_file {
 		using path_type = Path;
 
@@ -294,14 +284,14 @@ namespace daw {
 			if( m_path ) {
 				return m_path->native( );
 			}
-			return typename path_type::string_type{};
+			return typename path_type::string_type{ };
 		}
 
 		/// @brief return a file descriptor for a file created with exclusive RW
 		/// access and 00600 permissions.  Caller must close descriptor
 		[[nodiscard]] int secure_create_fd( ) const {
 			if( empty( ) ) {
-				throw std::runtime_error{"Attempt to create a file from empty path"};
+				throw std::runtime_error{ "Attempt to create a file from empty path" };
 			}
 			return m_path->secure_create_fd( );
 		}
@@ -309,7 +299,7 @@ namespace daw {
 		/// @brief create file with 00600 permissions
 		void secure_create_file( ) const {
 			if( empty( ) ) {
-				throw std::runtime_error{"Attempt to create a file from empty path"};
+				throw std::runtime_error{ "Attempt to create a file from empty path" };
 			}
 			m_path->secure_create_file( );
 		}
@@ -322,9 +312,9 @@ namespace daw {
 	}; // shared_temp_file
 
 	template<typename Path>
-	shared_temp_file( Path )->shared_temp_file<Path>;
+	shared_temp_file( Path ) -> shared_temp_file<Path>;
 
-	shared_temp_file( )->shared_temp_file<fs_impl::fs::path>;
+	shared_temp_file( ) -> shared_temp_file<std::filesystem::path>;
 
 	template<typename Path>
 	bool operator==( shared_temp_file<Path> const &lhs,

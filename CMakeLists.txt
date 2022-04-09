@@ -6,19 +6,17 @@
 # Official repository: https://github.com/beached/libtemp_file
 #
 
-cmake_minimum_required( VERSION 3.13 ) 
+cmake_minimum_required( VERSION 3.14 )
 
 project( "libtemp_file"
-	VERSION "1.0.1" 
+	VERSION "1.1.0"
 	DESCRIPTION "Provide an RAII temp file with random naming"
 	HOMEPAGE_URL "https://github.com/beached/libtemp_file"
 	LANGUAGES C CXX)
 
 set( CMAKE_CXX_STANDARD 17 CACHE STRING "The C++ standard whose features are requested.")
-set( CMAKE_CXX_STANDARD_REQUIRED ON)
-set( CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(Boost 1.62 COMPONENTS system iostreams filesystem REQUIRED)
+find_package(Boost 1.62 COMPONENTS iostreams filesystem REQUIRED)
 
 include( GNUInstallDirs)
 set( libtemp_file_INSTALL_CMAKEDIR
@@ -31,7 +29,7 @@ set( PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 add_library( ${PROJECT_NAME} INTERFACE ) 
 add_library( daw::${PROJECT_NAME} ALIAS ${PROJECT_NAME} )
 
-target_link_libraries( ${PROJECT_NAME} INTERFACE Boost::filesystem Boost::system Boost::iostreams ${COMPILER_SPECIFIC_LIBS} )
+target_link_libraries( ${PROJECT_NAME} INTERFACE Boost::filesystem Boost::iostreams ${COMPILER_SPECIFIC_LIBS} )
 target_compile_features( ${PROJECT_NAME} INTERFACE cxx_std_17)
 target_include_directories( ${PROJECT_NAME}
 	INTERFACE
