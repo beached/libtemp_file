@@ -31,36 +31,36 @@
 #define DAW_FILE_CLOSE close
 #endif
 
-namespace daw {
-	namespace fs_impl {
-		namespace fs = std::filesystem;
+namespace daw::fs_impl {
+	namespace fs = std::filesystem;
 
-		[[nodiscard]] constexpr auto sec_perm( ) {
+	[[nodiscard]] constexpr auto sec_perm( ) {
 #ifdef WIN32
-			return _S_IREAD | _S_IWRITE;
+		return _S_IREAD | _S_IWRITE;
 #else
-			return S_IRUSR | S_IWUSR;
+		return S_IRUSR | S_IWUSR;
 #endif
+	}
+
+	template<typename Path>
+	[[nodiscard]] Path generate_temp_file_path( Path const &temp_folder ) {
+		boost::filesystem::path result =
+		  boost::filesystem::unique_path( ).replace_extension( ".tmp" );
+		if constexpr( std::is_same_v<fs::path, boost::filesystem::path> ) {
+			return temp_folder / result;
+		} else {
+			return temp_folder / fs::path( result.native( ) );
 		}
+	}
 
-		template<typename Path>
-		[[nodiscard]] Path generate_temp_file_path( Path const &temp_folder ) {
-			boost::filesystem::path result =
-			  boost::filesystem::unique_path( ).replace_extension( ".tmp" );
-			if constexpr( std::is_same_v<fs::path, boost::filesystem::path> ) {
-				return temp_folder / result;
-			} else {
-				return temp_folder / fs::path( result.native( ) );
-			}
-		}
+	template<typename Path>
+	[[nodiscard]] Path generate_temp_file_path( ) {
+		return generate_temp_file_path( fs::temp_directory_path( ) );
+	}
 
-		template<typename Path>
-		[[nodiscard]] Path generate_temp_file_path( ) {
-			return generate_temp_file_path( fs::temp_directory_path( ) );
-		}
+} // namespace daw::fs_impl
 
-	} // namespace fs_impl
-
+namespace daw {
 	using fd_stream = std::unique_ptr<
 	  boost::iostreams::stream<boost::iostreams::file_descriptor>>;
 
@@ -83,12 +83,12 @@ namespace daw {
 		              ? fs_impl::generate_temp_file_path<path_type>( p )
 		              : std::move( p ) ) {}
 
+		// Call remove if errors need to be caught.  They are suppressed in
+		// destructor
 		~unique_temp_file( ) {
 			try {
 				remove( );
-			} catch( std::exception const & ) {
-				// TODO don't do this
-			}
+			} catch( ... ) {}
 		}
 
 		unique_temp_file( unique_temp_file &&other ) noexcept
@@ -180,48 +180,17 @@ namespace daw {
 			  secure_create_fd( ),
 			  boost::iostreams::file_descriptor_flags::close_handle );
 		}
+
+		bool operator==( unique_temp_file<Path> const &rhs ) const = default;
+		// clang-format: off
+		auto operator<=>( unique_temp_file<Path> const &rhs ) const = default;
+		// clang-format: on
 	}; // unique_temp_file
 
 	template<typename Path>
 	unique_temp_file( Path ) -> unique_temp_file<Path>;
 
 	unique_temp_file( ) -> unique_temp_file<std::filesystem::path>;
-
-	template<typename Path>
-	bool operator==( unique_temp_file<Path> const &lhs,
-	                 unique_temp_file<Path> const &rhs ) noexcept {
-		return *lhs == *rhs;
-	}
-
-	template<typename Path>
-	bool operator!=( unique_temp_file<Path> const &lhs,
-	                 unique_temp_file<Path> const &rhs ) noexcept {
-		return *lhs != *rhs;
-	}
-
-	template<typename Path>
-	bool operator<( unique_temp_file<Path> const &lhs,
-	                unique_temp_file<Path> const &rhs ) noexcept {
-		return *lhs < *rhs;
-	}
-
-	template<typename Path>
-	bool operator>( unique_temp_file<Path> const &lhs,
-	                unique_temp_file<Path> const &rhs ) noexcept {
-		return *lhs > *rhs;
-	}
-
-	template<typename Path>
-	bool operator<=( unique_temp_file<Path> const &lhs,
-	                 unique_temp_file<Path> const &rhs ) noexcept {
-		return *lhs <= *rhs;
-	}
-
-	template<typename Path>
-	bool operator>=( unique_temp_file<Path> const &lhs,
-	                 unique_temp_file<Path> const &rhs ) noexcept {
-		return *lhs >= *rhs;
-	}
 
 	/// @brief Constructs a shareable temp file path that can be copied and moved.
 	/// It has the same
@@ -309,6 +278,30 @@ namespace daw {
 		[[nodiscard]] fd_stream secure_create_stream( ) const {
 			return m_path->secure_create_stream( );
 		}
+
+		bool operator==( shared_temp_file const &rhs ) const {
+			if( m_path ) {
+				if( rhs ) {
+					return *m_path == *rhs;
+				}
+			}
+			return false;
+		}
+
+		bool operator!=( shared_temp_file const &rhs ) const = default;
+
+		auto operator<=>( shared_temp_file<Path> const &rhs ) const {
+			if( m_path ) {
+				if( rhs ) {
+					return m_path->operator*( ) <=> *rhs;
+				}
+				return std::strong_ordering::greater;
+			}
+			if( rhs ) {
+				return std::strong_ordering::less;
+			}
+			return std::strong_ordering::equal;
+		}
 	}; // shared_temp_file
 
 	template<typename Path>
@@ -316,75 +309,6 @@ namespace daw {
 
 	shared_temp_file( ) -> shared_temp_file<std::filesystem::path>;
 
-	template<typename Path>
-	bool operator==( shared_temp_file<Path> const &lhs,
-	                 shared_temp_file<Path> const &rhs ) noexcept {
-		if( lhs ) {
-			if( rhs ) {
-				return *lhs == *rhs;
-			}
-		}
-		return false;
-	}
-
-	template<typename Path>
-	bool operator!=( shared_temp_file<Path> const &lhs,
-	                 shared_temp_file<Path> const &rhs ) noexcept {
-		if( lhs ) {
-			if( rhs ) {
-				return *lhs != *rhs;
-			}
-		}
-		return true;
-	}
-
-	template<typename Path>
-	bool operator<( shared_temp_file<Path> const &lhs,
-	                shared_temp_file<Path> const &rhs ) noexcept {
-		if( rhs ) {
-			if( lhs ) {
-				return *lhs < *rhs;
-			}
-			return true;
-		}
-		return false;
-	}
-
-	template<typename Path>
-	bool operator>( shared_temp_file<Path> const &lhs,
-	                shared_temp_file<Path> const &rhs ) noexcept {
-		if( lhs ) {
-			if( rhs ) {
-				return *lhs > *rhs;
-			}
-			return true;
-		}
-		return false;
-	}
-
-	template<typename Path>
-	bool operator<=( shared_temp_file<Path> const &lhs,
-	                 shared_temp_file<Path> const &rhs ) noexcept {
-		if( lhs ) {
-			if( rhs ) {
-				return *lhs <= *rhs;
-			}
-			return false;
-		}
-		return true;
-	}
-
-	template<typename Path>
-	bool operator>=( shared_temp_file<Path> const &lhs,
-	                 shared_temp_file<Path> const &rhs ) noexcept {
-		if( rhs ) {
-			if( lhs ) {
-				return *lhs >= *rhs;
-			}
-			return false;
-		}
-		return true;
-	}
 } // namespace daw
 
 template<typename T>
